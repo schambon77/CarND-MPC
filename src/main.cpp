@@ -99,8 +99,14 @@ int main() {
           *
           */
           std::cout << "Number of waypoints: " << ptsx.size() << std::endl;
-          Eigen::VectorXd ptsx_e(ptsx.data());
-          Eigen::VectorXd ptsy_e(ptsy.data());
+          Eigen::VectorXd ptsx_e(ptsx.size());
+          for (int i = 0; i < ptsx.size(); i++) {
+        	  ptsx_e(i) = ptsx(i);
+          }
+          Eigen::VectorXd ptsy_e(ptsy.size());
+          for (int i = 0; i < ptsy.size(); i++) {
+        	  ptsy_e(i) = ptsy(i);
+          }
           auto coeffs = polyfit(ptsx_e, ptsy_e, 1);
 
 

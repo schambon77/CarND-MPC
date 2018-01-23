@@ -85,8 +85,8 @@ int main() {
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
-          vector<double> ptsx = j[1]["ptsx"];
-          vector<double> ptsy = j[1]["ptsy"];
+          Eigen::VectorXd ptsx = j[1]["ptsx"];
+          Eigen::VectorXd ptsy = j[1]["ptsy"];
           double px = j[1]["x"];
           double py = j[1]["y"];
           double psi = j[1]["psi"];
@@ -98,11 +98,13 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          std::cout << "Number of waypoints: " << ptsx.size() << std::endl;
           auto coeffs = polyfit(ptsx, ptsy, 1);
+
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = polyeval(coeffs, x) - y;
+          double cte = polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
           double epsi = psi - atan(coeffs[1]);

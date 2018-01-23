@@ -98,8 +98,42 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
-          double steer_value;
-          double throttle_value;
+          auto coeffs = polyfit(ptsx, ptsy, 1);
+
+          // The cross track error is calculated by evaluating at polynomial at x, f(x)
+          // and subtracting y.
+          double cte = polyeval(coeffs, x) - y;
+          // Due to the sign starting at 0, the orientation error is -f'(x).
+          // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
+          double epsi = psi - atan(coeffs[1]);
+
+          Eigen::VectorXd state(6);
+          state << x, y, psi, v, cte, epsi;
+
+          std::vector<double> x_vals = {state[0]};
+          std::vector<double> y_vals = {state[1]};
+          std::vector<double> psi_vals = {state[2]};
+          std::vector<double> v_vals = {state[3]};
+          std::vector<double> cte_vals = {state[4]};
+          std::vector<double> epsi_vals = {state[5]};
+          std::vector<double> delta_vals = {};
+          std::vector<double> a_vals = {};
+
+   		  auto vars = mpc.Solve(state, coeffs);
+
+          double steer_value = vars[0];
+          steer_value /= deg2rad(25);
+          if (steer_value > 1.0) {
+        	  steer_value = 1.0;
+          } else if (steer_value < -1.0) {
+        	  steer_value = -1.0;
+          }
+          double throttle_value = vars[1];
+          if (throttle_value > 1.0) {
+        	  throttle_value = 1.0;
+          } else if (throttle_value < -1.0) {
+        	  throttle_value = -1.0;
+          }
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.

@@ -110,7 +110,7 @@ int main() {
           double epsi = psi - atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
-          state << x, y, psi, v, cte, epsi;
+          state << px, py, psi, v, cte, epsi;
 
           std::vector<double> x_vals = {state[0]};
           std::vector<double> y_vals = {state[1]};

@@ -238,8 +238,5 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
-  // Cost
-  auto cost = solution.obj_value;
-
   return {solution.x[delta_start], solution.x[a_start]};
 }

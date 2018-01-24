@@ -45,6 +45,8 @@ class FG_eval {
     // NOTE: You'll probably go back and forth between this function and
     // the Solver function below.
 
+	std::cout << "Start of FG Eval Operator" << std::endl;
+
 	size_t t;
 
 	fg[0] = 0;
@@ -140,6 +142,9 @@ MPC::MPC() {}
 MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
+
+  std::cout << "Start of MPC Solve" << std::endl;
+
   bool ok = true;
   size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;

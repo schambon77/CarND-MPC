@@ -116,7 +116,7 @@ int main() {
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
     	  double psides = 0.0;
-    	  for (i = 1; i < coeffs.size(); i++) {
+    	  for (i = 1; i < (size_t)coeffs.size(); i++) {
     	    psides += coeffs[i] * i * pow(px, i - 1);
     	  }
           double epsi = psi - atan(psides);

@@ -99,7 +99,6 @@ int main() {
           *
           */
           size_t i;
-          std::cout << "Number of waypoints: " << ptsx.size() << std::endl;
           Eigen::VectorXd ptsx_e(ptsx.size());
           for (i = 0; i < ptsx.size(); i++) {
         	  ptsx_e(i) = ptsx[i];
@@ -116,7 +115,11 @@ int main() {
           double cte = polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
-          double epsi = psi - atan(coeffs[1]);
+    	  double psides = 0.0;
+    	  for (i = 1; i < coeffs.size(); i++) {
+    	    psides += coeffs[i] * i * CppAD::pow(px, i - 1);
+    	  }
+          double epsi = psi - atan(psides);
 
           Eigen::VectorXd state(6);
           state << px, py, psi, v, cte, epsi;

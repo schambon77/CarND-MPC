@@ -103,8 +103,16 @@ class FG_eval {
 	  AD<double> delta0 = vars[delta_start + t - 1];
 	  AD<double> a0 = vars[a_start + t - 1];
 
-	  AD<double> f0 = coeffs[0] + coeffs[1] * x0;
-	  AD<double> psides0 = CppAD::atan(coeffs[1]);
+	  AD<double> f0 = 0.0;
+	  for (t = 0; t < coeffs.size(); t++) {
+	    f0 += coeffs[t] * CppAD::pow(x0, t);
+	  }
+
+	  AD<double> psides0 = 0.0;
+	  for (t = 1; t < coeffs.size(); t++) {
+	    psides0 += coeffs[t] * t * CppAD::pow(x0, t - 1);
+	  }
+	  psides0 = CppAD::atan(psides0);
 
 	  // Equations for the model:
 	  // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt

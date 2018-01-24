@@ -132,6 +132,8 @@ class FG_eval {
 	  fg[1 + epsi_start + t] =
 		  epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
 	}
+
+	std::cout << "End of FG Eval Operator" << std::endl;
   }
 };
 
@@ -250,6 +252,8 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
+
+  std::cout << "delta: " << solution.x[delta_start] << ", a: " << solution.x[a_start] << std::endl;
 
   return {solution.x[delta_start], solution.x[a_start]};
 }

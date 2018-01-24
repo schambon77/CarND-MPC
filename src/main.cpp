@@ -107,7 +107,7 @@ int main() {
           for (i = 0; i < ptsy.size(); i++) {
         	  ptsy_e(i) = ptsy[i];
           }
-          auto coeffs = polyfit(ptsx_e, ptsy_e, 1);
+          auto coeffs = polyfit(ptsx_e, ptsy_e, 3);
 
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
@@ -116,8 +116,8 @@ int main() {
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
     	  double psides = 0.0;
-    	  for (i = 1; i < (size_t)coeffs.size(); i++) {
-    	    psides += coeffs[i] * i * pow(px, i - 1);
+    	  for (int j = 1; j < coeffs.size(); j++) {
+    	    psides += coeffs[j] * j * pow(px, j - 1);
     	  }
           double epsi = psi - atan(psides);
 

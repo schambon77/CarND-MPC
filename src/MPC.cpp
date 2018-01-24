@@ -45,8 +45,6 @@ class FG_eval {
     // NOTE: You'll probably go back and forth between this function and
     // the Solver function below.
 
-	std::cout << "Start of FG Eval Operator" << std::endl;
-
 	size_t t;
 
 	fg[0] = 0;
@@ -105,20 +103,16 @@ class FG_eval {
 	  AD<double> delta0 = vars[delta_start + t - 1];
 	  AD<double> a0 = vars[a_start + t - 1];
 
-      //std::cout << "Before computing f0" << std::endl;
-
 	  AD<double> f0 = 0.0;
 	  for (int i = 0; i < coeffs.size(); i++) {
 	    f0 += coeffs[i] * CppAD::pow(x0, i);
 	  }
-      //std::cout << "f0: " << f0 << std::endl;
 
 	  AD<double> psides0 = 0.0;
 	  for (int i = 1; i < coeffs.size(); i++) {
 	    psides0 += coeffs[i] * i * CppAD::pow(x0, i - 1);
 	  }
 	  psides0 = CppAD::atan(psides0);
-      //std::cout << "psides0: " << psides0 << std::endl;
 
 	  // Equations for the model:
 	  // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
@@ -136,8 +130,6 @@ class FG_eval {
 	  fg[1 + epsi_start + t] =
 		  epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
 	}
-
-	std::cout << "End of FG Eval Operator" << std::endl;
   }
 };
 
@@ -148,8 +140,6 @@ MPC::MPC() {}
 MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
-
-  std::cout << "Start of MPC Solve" << std::endl;
 
   bool ok = true;
   size_t i;

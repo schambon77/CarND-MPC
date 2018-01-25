@@ -77,8 +77,8 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   } else {
 	alpha = -pi();
   }
-  newpoint[0] = dist*cos(alpha-psi);   //x projection of point to convert on car heading line
-  newpoint[1] = dist*sin(alpha-psi);   //y projection of point to convert on car heading line
+  newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line
+  newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line
 
   return newpoint;
 }
@@ -180,9 +180,9 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
-          for (i = 0; i < ptsx_e.size(); i++) {
-        	  next_x_vals.push_back(ptsx_e[i]);
-        	  next_y_vals.push_back(ptsy_e[i]);
+          for (int j = 0; j < ptsx_e.size(); j++) {
+        	  next_x_vals.push_back(ptsx_e[j]);
+        	  next_y_vals.push_back(ptsy_e[j]);
           }
 
           msgJson["next_x"] = next_x_vals;

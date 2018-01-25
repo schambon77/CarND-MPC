@@ -65,6 +65,24 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
+Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
+  Eigen::VectorXd newpoint(2);
+
+  double dist = sqrt(pow(point2convert_x-car_map_pos_x, 2)+pow(point2convert_y-car_map_pos_y, 2));   //distance between car and point to convert
+  double alpha = 0.0;    //angle between car-point line and map horizontal
+  if (point2convert_x-car_map_pos_x > 0.00001) {
+	alpha = atan((point2convert_y-car_map_pos_y)/(point2convert_x-car_map_pos_x));
+  } else if (point2convert_y>car_map_pos_y) {
+	alpha = pi();
+  } else {
+	alpha = -pi();
+  }
+  newpoint[0] = dist*cos(alpha-psi);   //x projection of point to convert on car heading line
+  newpoint[1] = dist*sin(alpha-psi);   //y projection of point to convert on car heading line
+
+  return newpoint;
+}
+
 int main() {
   uWS::Hub h;
 
@@ -100,38 +118,29 @@ int main() {
           */
           size_t i;
           Eigen::VectorXd ptsx_e(ptsx.size());
-          for (i = 0; i < ptsx.size(); i++) {
-        	  ptsx_e(i) = ptsx[i];
-          }
           Eigen::VectorXd ptsy_e(ptsy.size());
-          for (i = 0; i < ptsy.size(); i++) {
-        	  ptsy_e(i) = ptsy[i];
+          Eigen::VectorXd convertedPoint;
+          for (i = 0; i < ptsx.size(); i++) {
+        	  convertedPoint = convert2carcoordinates(px, py, psi, ptsx[i], ptsy[i]);
+        	  ptsx_e(i) = convertedPoint[0];
+        	  ptsy_e(i) = convertedPoint[1];
           }
           auto coeffs = polyfit(ptsx_e, ptsy_e, 3);
 
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = polyeval(coeffs, px) - py;
+          double cte = coeffs[0]; //polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
-    	  double psides = 0.0;
-    	  for (int j = 1; j < coeffs.size(); j++) {
-    	    psides += coeffs[j] * j * pow(px, j - 1);
-    	  }
+    	  double psides = coeffs[1];
+    	  //for (int j = 1; j < coeffs.size(); j++) {
+    	  //  psides += coeffs[j] * j * pow(px, j - 1);
+    	  //}
           double epsi = psi - atan(psides);
 
           Eigen::VectorXd state(6);
           state << px, py, psi, v, cte, epsi;
-
-          std::vector<double> x_vals = {state[0]};
-          std::vector<double> y_vals = {state[1]};
-          std::vector<double> psi_vals = {state[2]};
-          std::vector<double> v_vals = {state[3]};
-          std::vector<double> cte_vals = {state[4]};
-          std::vector<double> epsi_vals = {state[5]};
-          std::vector<double> delta_vals = {};
-          std::vector<double> a_vals = {};
 
    		  auto vars = mpc.Solve(state, coeffs);
 
@@ -171,6 +180,10 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          for (i = 0; i < ptsx_e.size(); i++) {
+        	  next_x_vals.push_back(ptsx_e[i]);
+        	  next_y_vals.push_back(ptsy_e[i]);
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;

@@ -77,7 +77,7 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   } else {
 	alpha = -pi();
   }
-  if (point2convert_x>car_map_pos_x) {
+  if (point2convert_x<car_map_pos_x) {
 	  alpha += pi();
   }
   newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line

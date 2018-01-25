@@ -70,12 +70,15 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
 
   double dist = sqrt(pow(point2convert_x-car_map_pos_x, 2)+pow(point2convert_y-car_map_pos_y, 2));   //distance between car and point to convert
   double alpha = 0.0;    //angle between car-point line and map horizontal
-  if (point2convert_x-car_map_pos_x > 0.00001) {
+  if (abs(point2convert_x-car_map_pos_x) > 0.00001) {
 	alpha = atan((point2convert_y-car_map_pos_y)/(point2convert_x-car_map_pos_x));
   } else if (point2convert_y>car_map_pos_y) {
 	alpha = pi();
   } else {
 	alpha = -pi();
+  }
+  if (point2convert_x>car_map_pos_x) {
+	  alpha += pi();
   }
   newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line
   newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line

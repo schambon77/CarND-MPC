@@ -147,16 +147,16 @@ int main() {
           Eigen::VectorXd state(6);
           state << px, py, psi, v, cte, epsi;
 
-   		  auto vars = mpc.Solve(state, coeffs);
+   		  auto results = mpc.Solve(state, coeffs);
 
-          double steer_value = vars[0];
+          double steer_value = results[0];
           steer_value /= deg2rad(25);
           if (steer_value > 1.0) {
         	  steer_value = 1.0;
           } else if (steer_value < -1.0) {
         	  steer_value = -1.0;
           }
-          double throttle_value = vars[1];
+          double throttle_value = results[1];
           if (throttle_value > 1.0) {
         	  throttle_value = 1.0;
           } else if (throttle_value < -1.0) {
@@ -175,6 +175,11 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
+          int N = (results.size()-2)/2;
+          for (int j = 0; j < N; j++) {
+              mpc_x_vals.push_back(results[2+j]);
+              mpc_y_vals.push_back(results[2+j+1]);
+          }
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;

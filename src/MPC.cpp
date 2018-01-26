@@ -248,6 +248,13 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
   std::cout << "delta: " << solution.x[delta_start] << ", a: " << solution.x[a_start] << std::endl;
+  vector<double> results;
+  results.push_back(solution.x[delta_start]);
+  results.push_back(solution.x[a_start]);
+  for (i = 0; i < N; i++) {
+	results.push_back(solution.x[x_start+i]);
+	results.push_back(solution.x[y_start+i]);
+  }
 
-  return {solution.x[delta_start], solution.x[a_start]};
+  return results;
 }

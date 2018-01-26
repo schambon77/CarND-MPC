@@ -83,7 +83,7 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line
   newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line
 
-  std::cout << "xc: " << car_map_pos_x << " yc: " << car_map_pos_y << " psi: " << car_map_psi << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
+  std::cout << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
 
   return newpoint;
 }
@@ -125,6 +125,7 @@ int main() {
           Eigen::VectorXd ptsx_e(ptsx.size());
           Eigen::VectorXd ptsy_e(ptsy.size());
           Eigen::VectorXd convertedPoint;
+          std::cout << "xc: " << px << " yc: " << py << " psi: " << psi << std::endl;
           for (i = 0; i < ptsx.size(); i++) {
         	  convertedPoint = convert2carcoordinates(px, py, psi, ptsx[i], ptsy[i]);
         	  ptsx_e(i) = convertedPoint[0];
@@ -177,8 +178,10 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
-              mpc_x_vals.push_back(results[2*(1+j)]);
+            if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {
+        	  mpc_x_vals.push_back(results[2*(1+j)]);
               mpc_y_vals.push_back(results[2*(1+j)+1]);
+            }
           }
 
           msgJson["mpc_x"] = mpc_x_vals;
@@ -191,8 +194,10 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
           for (int j = 0; j < ptsx_e.size(); j++) {
+        	if (ptsx_e[j] > 0.0 && ptsx_e[j] < 100.0) {
         	  next_x_vals.push_back(ptsx_e[j]);
         	  next_y_vals.push_back(ptsy_e[j]);
+            }
           }
 
           msgJson["next_x"] = next_x_vals;

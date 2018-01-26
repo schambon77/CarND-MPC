@@ -177,8 +177,8 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
-              mpc_x_vals.push_back(results[2+j]);
-              mpc_y_vals.push_back(results[2+j+1]);
+              mpc_x_vals.push_back(results[2*(1+j)]);
+              mpc_y_vals.push_back(results[2*(1+j)+1]);
           }
 
           msgJson["mpc_x"] = mpc_x_vals;

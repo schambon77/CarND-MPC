@@ -69,13 +69,13 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   Eigen::VectorXd newpoint(2);
 
   double dist = sqrt(pow(point2convert_x-car_map_pos_x, 2)+pow(point2convert_y-car_map_pos_y, 2));   //distance between car and point to convert
-  double alpha = 0.0;    //angle between car-point line and map horizontal
+  double alpha = 0.0;    //angle between car-point line and map x axis
   if (abs(point2convert_x-car_map_pos_x) > 0.00001) {
 	alpha = atan((point2convert_y-car_map_pos_y)/(point2convert_x-car_map_pos_x));
   } else if (point2convert_y>car_map_pos_y) {
-	alpha = pi();
+	alpha = pi()/2.0;
   } else {
-	alpha = -pi();
+	alpha = -pi()/2.0;
   }
   if (point2convert_x<car_map_pos_x) {
 	  alpha += pi();
@@ -139,14 +139,15 @@ int main() {
           double cte = coeffs[0]; //polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
-    	  double psides = coeffs[1];
+    	  double psides = atan(coeffs[1]);
     	  //for (int j = 1; j < coeffs.size(); j++) {
     	  //  psides += coeffs[j] * j * pow(px, j - 1);
     	  //}
-          double epsi = psi - atan(psides);
+          double epsi = psi - psides;
 
           Eigen::VectorXd state(6);
-          state << px, py, psi, v, cte, epsi;
+          //state << px, py, psi, v, cte, epsi;
+          state << 0.0, 0.0, psi, v, cte, epsi;
 
    		  auto results = mpc.Solve(state, coeffs);
 
@@ -178,7 +179,7 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
-            if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {
+            if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
         	  mpc_x_vals.push_back(results[2*(1+j)]);
               mpc_y_vals.push_back(results[2*(1+j)+1]);
             }
@@ -194,7 +195,7 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
           for (int j = 0; j < ptsx_e.size(); j++) {
-        	if (ptsx_e[j] > 0.0 && ptsx_e[j] < 100.0) {
+        	if (ptsx_e[j] > 0.0 && ptsx_e[j] < 100.0) {   //only show projection about 100 m ahead
         	  next_x_vals.push_back(ptsx_e[j]);
         	  next_y_vals.push_back(ptsy_e[j]);
             }

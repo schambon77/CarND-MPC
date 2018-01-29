@@ -124,30 +124,32 @@ int main() {
           size_t i;
           Eigen::VectorXd ptsx_e(ptsx.size());
           Eigen::VectorXd ptsy_e(ptsy.size());
+          Eigen::VectorXd ptsx_conv(ptsx.size());
+          Eigen::VectorXd ptsy_conv(ptsy.size());
           Eigen::VectorXd convertedPoint;
           std::cout << "xc: " << px << " yc: " << py << " psi: " << psi << std::endl;
           for (i = 0; i < ptsx.size(); i++) {
         	  convertedPoint = convert2carcoordinates(px, py, psi, ptsx[i], ptsy[i]);
-        	  ptsx_e(i) = convertedPoint[0];
-        	  ptsy_e(i) = convertedPoint[1];
+        	  ptsx_conv(i) = convertedPoint[0];
+        	  ptsy_conv(i) = convertedPoint[1];
           }
+          auto coeffs_conv = polyfit(ptsx_conv, ptsy_conv, 3);
           auto coeffs = polyfit(ptsx_e, ptsy_e, 3);
 
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = coeffs[0]; //polyeval(coeffs, px) - py;
+          double cte = coeffs_conv[0]; //polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
-    	  double psides = atan(coeffs[1]);
+    	  double psides = atan(coeffs_conv[1]);
     	  //for (int j = 1; j < coeffs.size(); j++) {
     	  //  psides += coeffs[j] * j * pow(px, j - 1);
     	  //}
           double epsi = psi - psides;
 
           Eigen::VectorXd state(6);
-          //state << px, py, psi, v, cte, epsi;
-          state << 0.0, 0.0, psi, v, cte, epsi;
+          state << px, py, psi, v, cte, epsi;
 
    		  auto results = mpc.Solve(state, coeffs);
 
@@ -179,9 +181,11 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
+        	  convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
+
             //if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
-        	  mpc_x_vals.push_back(results[2*(1+j)]);
-              mpc_y_vals.push_back(results[2*(1+j)+1]);
+        	  mpc_x_vals.push_back(convertedPoint[0]);
+              mpc_y_vals.push_back(convertedPoint[1]);
             //}
           }
 
@@ -194,10 +198,10 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
-          for (int j = 0; j < ptsx_e.size(); j++) {
-        	if (ptsx_e[j] > 0.0 && ptsx_e[j] < 100.0) {   //only show projection about 100 m ahead
-        	  next_x_vals.push_back(ptsx_e[j]);
-        	  next_y_vals.push_back(ptsy_e[j]);
+          for (int j = 0; j < ptsx_conv.size(); j++) {
+        	if (ptsx_conv[j] > 0.0 && ptsx_conv[j] < 100.0) {   //only show projection about 100 m ahead
+        	  next_x_vals.push_back(ptsx_conv[j]);
+        	  next_y_vals.push_back(ptsy_conv[j]);
             }
           }
 

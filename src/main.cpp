@@ -132,6 +132,8 @@ int main() {
         	  convertedPoint = convert2carcoordinates(px, py, psi, ptsx[i], ptsy[i]);
         	  ptsx_conv(i) = convertedPoint[0];
         	  ptsy_conv(i) = convertedPoint[1];
+        	  ptsx_e(i) = ptsx[i];
+        	  ptsy_e(i) = ptsy[i];
           }
           auto coeffs_conv = polyfit(ptsx_conv, ptsy_conv, 3);
           auto coeffs = polyfit(ptsx_e, ptsy_e, 3);

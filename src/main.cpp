@@ -157,6 +157,7 @@ int main() {
 
           double steer_value = results[0];
           steer_value /= deg2rad(25);
+          steer_value *= -1.0;
           if (steer_value > 1.0) {
         	  steer_value = 1.0;
           } else if (steer_value < -1.0) {

@@ -203,12 +203,21 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          double xj, yj;
+          for (int j = 0; j < 10; j++) {
+        	xj = (j+1)*10.0;
+        	yj = polyeval(coeffs_conv, xj);
+            next_x_vals.push_back(xj);
+        	next_y_vals.push_back(yj);
+          }
+          /*
           for (int j = 0; j < ptsx_conv.size(); j++) {
         	if (ptsx_conv[j] > 0.0 && ptsx_conv[j] < 100.0) {   //only show projection about 100 m ahead
         	  next_x_vals.push_back(ptsx_conv[j]);
         	  next_y_vals.push_back(ptsy_conv[j]);
             }
           }
+          */
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;

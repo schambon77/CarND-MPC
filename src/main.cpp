@@ -188,10 +188,10 @@ int main() {
           for (int j = 0; j < N; j++) {
         	  convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
 
-            //if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
+            if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
         	  mpc_x_vals.push_back(convertedPoint[0]);
               mpc_y_vals.push_back(convertedPoint[1]);
-            //}
+            }
           }
 
           msgJson["mpc_x"] = mpc_x_vals;

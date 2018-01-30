@@ -204,8 +204,8 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
           double xj, yj;
-          for (int j = 0; j < 10; j++) {
-        	xj = (j+1)*10.0;
+          for (int j = 0; j < 11; j++) {
+        	xj = j*10.0;
         	yj = polyeval(coeffs_conv, xj);
             next_x_vals.push_back(xj);
         	next_y_vals.push_back(yj);

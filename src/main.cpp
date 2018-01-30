@@ -165,11 +165,12 @@ int main() {
           } else if (steer_value < -1.0) {
         	  steer_value = -1.0;
           }
+          double max_throttle = 0.1;
           double throttle_value = results[1];
-          if (throttle_value > 1.0) {
-        	  throttle_value = 1.0;
-          } else if (throttle_value < -1.0) {
-        	  throttle_value = -1.0;
+          if (throttle_value > max_throttle) {
+        	  throttle_value = max_throttle;
+          } else if (throttle_value < -max_throttle) {
+        	  throttle_value = -max_throttle;
           }
 
           json msgJson;

@@ -152,6 +152,7 @@ int main() {
     	  //  psides += coeffs[j] * j * pow(px, j - 1);
     	  //}
           double epsi = psi - psides;
+          std::cout << "cte: " << cte << " epsi: " << epsi << std::endl;
 
           Eigen::VectorXd state(8);
           state << px, py, psi, v, cte, epsi, steering_angle, throttle;

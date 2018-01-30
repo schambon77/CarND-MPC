@@ -65,6 +65,7 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
+/*
 Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
   Eigen::VectorXd newpoint(2);
 
@@ -84,6 +85,19 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line
 
   //std::cout << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
+
+  return newpoint;
+}
+*/
+
+Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
+
+  double x = point2convert_x - car_map_pos_x;
+  double y = point2convert_y - car_map_pos_y;
+
+  Eigen::VectorXd newpoint(2);
+  newpoint[0] = x * cos(-car_map_psi) - y * sin(-car_map_psi);
+  newpoint[1] = x * sin(-car_map_psi) + y * cos(-car_map_psi);
 
   return newpoint;
 }
@@ -144,7 +158,7 @@ int main() {
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = coeffs_conv[0]; //polyeval(coeffs, px) - py;
+          double cte = -coeffs_conv[0]; //polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
     	  double psides = atan(coeffs_conv[1]);

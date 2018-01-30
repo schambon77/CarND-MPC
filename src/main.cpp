@@ -144,7 +144,7 @@ int main() {
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = -coeffs_conv[0]; //polyeval(coeffs, px) - py;
+          double cte = coeffs_conv[0]; //polyeval(coeffs, px) - py;
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
     	  double psides = atan(coeffs_conv[1]);

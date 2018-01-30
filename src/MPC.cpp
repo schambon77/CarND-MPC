@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 200;
-double dt = 0.01;
+size_t N = 1000;
+double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -123,7 +123,7 @@ class FG_eval {
 	  // epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
 	  fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
 	  fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-	  fg[1 + psi_start + t] = psi1 - (psi0 + v0 * (delta0 / Lf) * dt);  //model equation modified to factor positive angle means right turn
+	  fg[1 + psi_start + t] = psi1 - (psi0 - v0 * (delta0 / Lf) * dt);  //model equation modified to factor positive angle means right turn
 	  fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
 	  fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
 	  fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * (delta0 / Lf) * dt);
@@ -149,6 +149,16 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   double v = state[3];
   double cte = state[4];
   double epsi = state[5];
+  double steering_angle = state[6];
+  double throttle = state[7];
+
+  //Introduce latency by running a simulation for 100ms to predict
+  //the new state to use for the model predictive control
+  double latency = 0.1;
+  x += v * cos(psi) * latency;
+  y += v * sin(psi) * latency;
+  psi -= (v/Lf) * steering_angle * latency;
+  v += throttle * latency;
 
   // Number of model variables (includes both states and inputs).
   size_t n_vars = N * 6 + (N - 1) * 2;

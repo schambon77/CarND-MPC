@@ -83,7 +83,7 @@ Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_
   newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line
   newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line
 
-  std::cout << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
+  //std::cout << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
 
   return newpoint;
 }

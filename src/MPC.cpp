@@ -6,7 +6,7 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 70;
+size_t N = 50;
 double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
@@ -51,9 +51,9 @@ class FG_eval {
 
 	// The part of the cost based on the reference state.
 	for (t = 0; t < N; t++) {
-	  fg[0] += 50*CppAD::pow(vars[cte_start + t], 2);
+	  fg[0] += CppAD::pow(vars[cte_start + t], 2);
 	  fg[0] += CppAD::pow(vars[epsi_start + t], 2);
-	  fg[0] += 10*CppAD::pow(vars[v_start + t] - ref_v, 2);
+	  fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
 	}
 
 	// Minimize the use of actuators.
@@ -64,8 +64,8 @@ class FG_eval {
 
 	// Minimize the value gap between sequential actuations.
 	for (t = 0; t < N - 2; t++) {
-	  fg[0] += 300*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-	  fg[0] += 300*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+	  fg[0] += CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+	  fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
 	}
 
 	//
@@ -151,6 +151,18 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   double epsi = state[5];
   double steering_angle = state[6];
   double throttle = state[7];
+
+  //dynamic update of N and dt depending on speed
+  double T = 2;
+  double maxdt = 1.0;
+  double mindt = 0.01;
+  dt = 2 / v;
+  if (dt > maxdt) {
+	  dt = maxdt;
+  } else if (dt < mindt) {
+	  dt = mindt;
+  }
+  std::cout << "dt: " << dt << std::endl;
 
   //Introduce latency by running a simulation for 100ms to predict
   //the new state to use for the model predictive control

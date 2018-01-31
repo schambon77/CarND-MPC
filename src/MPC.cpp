@@ -53,7 +53,7 @@ class FG_eval {
 	for (t = 0; t < N; t++) {
 	  fg[0] += CppAD::pow(vars[cte_start + t], 2);
 	  fg[0] += CppAD::pow(vars[epsi_start + t], 2);
-	  fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
+	  fg[0] += 10*CppAD::pow(vars[v_start + t] - ref_v, 2);
 	}
 
 	// Minimize the use of actuators.
@@ -153,7 +153,6 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   double throttle = state[7];
 
   //dynamic update of N and dt depending on speed
-  double T = 2;
   double maxdt = 1.0;
   double mindt = 0.01;
   dt = 2 / v;

@@ -152,6 +152,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   double steering_angle = state[6];
   double throttle = state[7];
 
+  /*
   //dynamic update of N and dt depending on speed
   double maxdt = 1.0;
   double mindt = 0.01;
@@ -162,6 +163,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 	  dt = mindt;
   }
   std::cout << "dt: " << dt << std::endl;
+  */
 
   //Introduce latency by running a simulation for 100ms to predict
   //the new state to use for the model predictive control

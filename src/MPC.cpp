@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 10;
-double dt = 0.1;
+size_t N = 20;
+double dt = 0.04;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -51,21 +51,21 @@ class FG_eval {
 
 	// The part of the cost based on the reference state.
 	for (t = 0; t < N; t++) {
-	  fg[0] += CppAD::pow(vars[cte_start + t], 2);
-	  fg[0] += CppAD::pow(vars[epsi_start + t], 2);
-	  fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
+	  fg[0] += 10*t*CppAD::pow(vars[cte_start + t], 2);
+	  fg[0] += 10*t*CppAD::pow(vars[epsi_start + t], 2);
+	  fg[0] += 1*CppAD::pow(vars[v_start + t] - ref_v, 2);
 	}
 
 	// Minimize the use of actuators.
 	for (t = 0; t < N - 1; t++) {
-	  fg[0] += 10*CppAD::pow(vars[delta_start + t], 2);
-	  fg[0] += 10*CppAD::pow(vars[a_start + t], 2);
+	  fg[0] += 1*CppAD::pow(vars[delta_start + t], 2);
+	  fg[0] += 1*CppAD::pow(vars[a_start + t], 2);
 	}
 
 	// Minimize the value gap between sequential actuations.
 	for (t = 0; t < N - 2; t++) {
-	  fg[0] += 100*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-	  fg[0] += 100*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+	  fg[0] += 100000*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+	  fg[0] += 10*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
 	}
 
 	//
@@ -149,30 +149,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   double v = state[3];
   double cte = state[4];
   double epsi = state[5];
-  double steering_angle = state[6];
-  double throttle = state[7];
-
-  /*
-  //dynamic update of N and dt depending on speed
-  double maxdt = 1.0;
-  double mindt = 0.01;
-  dt = 2 / v;
-  if (dt > maxdt) {
-	  dt = maxdt;
-  } else if (dt < mindt) {
-	  dt = mindt;
-  }
-  std::cout << "dt: " << dt << std::endl;
-  */
-
-  //Introduce latency by running a simulation for 100ms to predict
-  //the new state to use for the model predictive control
-  double latency = 0.1;
-  x += v * cos(psi) * latency;
-  y += v * sin(psi) * latency;
-  psi -= (v/Lf) * steering_angle * latency;
-  v += throttle * latency;
-
+  
   // Number of model variables (includes both states and inputs).
   size_t n_vars = N * 6 + (N - 1) * 2;
   size_t n_constraints = N * 6;

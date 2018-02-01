@@ -138,6 +138,12 @@ int main() {
           *
           */
 
+          double latency = 0.1;
+          px += v * cos(psi) * latency;
+	  py += v * sin(psi) * latency;
+          psi -= (v/2.67) * steering_angle * latency;
+          v += throttle * latency;
+
           size_t i;
           Eigen::VectorXd ptsx_e(ptsx.size());
           Eigen::VectorXd ptsy_e(ptsy.size());
@@ -168,8 +174,8 @@ int main() {
           double epsi = psi - psides;
           std::cout << "cte: " << cte << " epsi: " << epsi << std::endl;
 
-          Eigen::VectorXd state(8);
-          state << px, py, psi, v, cte, epsi, steering_angle, throttle;
+          Eigen::VectorXd state(6);
+          state << px, py, psi, v, cte, epsi;
 
    		  auto results = mpc.Solve(state, coeffs);
 
@@ -202,6 +208,7 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
+        	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
         	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
             //if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
         	  mpc_x_vals.push_back(convertedPoint[0]);

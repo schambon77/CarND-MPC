@@ -147,9 +147,11 @@ int main() {
           std::cout << "cte: " << cte << " epsi: " << epsi << std::endl;
 
           Eigen::VectorXd state(6);
-          state << px, py, psi, v, cte, epsi;
+          //state << px, py, psi, v, cte, epsi;
+          state << 0.0, 0.0, 0.0, v, cte, epsi;
 
-          auto results = mpc.Solve(state, coeffs);
+          //auto results = mpc.Solve(state, coeffs);
+          auto results = mpc.Solve(state, coeffs_conv);
 
           double steer_value = results[0];
           steer_value /= deg2rad(25);
@@ -180,12 +182,12 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
-        	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
-        	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
-            //if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
-                mpc_x_vals.push_back(convertedPoint[0]);
-                mpc_y_vals.push_back(convertedPoint[1]);
-            //}
+        	//convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
+        	//convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
+            //mpc_x_vals.push_back(convertedPoint[0]);
+            //mpc_y_vals.push_back(convertedPoint[1]);
+            mpc_x_vals.push_back(results[2*(1+j)]);
+            mpc_y_vals.push_back(results[2*(1+j)+1]);
           }
 
           msgJson["mpc_x"] = mpc_x_vals;

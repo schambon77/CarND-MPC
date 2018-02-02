@@ -16,6 +16,7 @@ using json = nlohmann::json;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
+const double Lf = 2.67;
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -106,17 +107,10 @@ int main() {
           double steering_angle = j[1]["steering_angle"];
           double throttle = j[1]["throttle"];
 
-          /*
-          * TODO: Calculate steering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-
           double latency = 0.1;
           px += v * cos(psi) * latency;
           py += v * sin(psi) * latency;
-          psi -= (v/2.67) * steering_angle * latency;
+          psi -= (v/Lf) * steering_angle * latency;
           v += throttle * latency;
 
           size_t i;
@@ -134,9 +128,7 @@ int main() {
         	  ptsy_e(i) = ptsy[i];
           }
           auto coeffs_conv = polyfit(ptsx_conv, ptsy_conv, 3);
-          auto coeffs = polyfit(ptsx_e, ptsy_e, 3);
-
-
+          
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
           double cte = coeffs_conv[0];
@@ -147,10 +139,8 @@ int main() {
           std::cout << "cte: " << cte << " epsi: " << epsi << std::endl;
 
           Eigen::VectorXd state(6);
-          //state << px, py, psi, v, cte, epsi;
           state << 0.0, 0.0, 0.0, v, cte, epsi;
 
-          //auto results = mpc.Solve(state, coeffs);
           auto results = mpc.Solve(state, coeffs_conv);
 
           double steer_value = results[0];
@@ -182,10 +172,6 @@ int main() {
           // the points in the simulator are connected by a Green line
           int N = (results.size()-2)/2;
           for (int j = 0; j < N; j++) {
-        	//convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
-        	//convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
-            //mpc_x_vals.push_back(convertedPoint[0]);
-            //mpc_y_vals.push_back(convertedPoint[1]);
             mpc_x_vals.push_back(results[2*(1+j)]);
             mpc_y_vals.push_back(results[2*(1+j)+1]);
           }
@@ -203,17 +189,9 @@ int main() {
           for (int j = 0; j < 11; j++) {
         	xj = j*10.0;
         	yj = polyeval(coeffs_conv, xj);
-            next_x_vals.push_back(xj);
+                next_x_vals.push_back(xj);
         	next_y_vals.push_back(yj);
           }
-          /*
-          for (int j = 0; j < ptsx_conv.size(); j++) {
-        	if (ptsx_conv[j] > 0.0 && ptsx_conv[j] < 100.0) {   //only show projection about 100 m ahead
-        	  next_x_vals.push_back(ptsx_conv[j]);
-        	  next_y_vals.push_back(ptsy_conv[j]);
-            }
-          }
-          */
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;

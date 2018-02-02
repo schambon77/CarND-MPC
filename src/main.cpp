@@ -65,31 +65,6 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
-/*
-Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
-  Eigen::VectorXd newpoint(2);
-
-  double dist = sqrt(pow(point2convert_x-car_map_pos_x, 2)+pow(point2convert_y-car_map_pos_y, 2));   //distance between car and point to convert
-  double alpha = 0.0;    //angle between car-point line and map x axis
-  if (abs(point2convert_x-car_map_pos_x) > 0.00001) {
-	alpha = atan((point2convert_y-car_map_pos_y)/(point2convert_x-car_map_pos_x));
-  } else if (point2convert_y>car_map_pos_y) {
-	alpha = pi()/2.0;
-  } else {
-	alpha = -pi()/2.0;
-  }
-  if (point2convert_x<car_map_pos_x) {
-	  alpha += pi();
-  }
-  newpoint[0] = dist*cos(alpha-car_map_psi);   //x projection of point to convert on car heading line
-  newpoint[1] = dist*sin(alpha-car_map_psi);   //y projection of point to convert on car heading line
-
-  //std::cout << " xw: " << point2convert_x << " yw: " << point2convert_y << " alpha: " << alpha << " xwc: " << newpoint[0] << " ywc: " << newpoint[1] << std::endl;
-
-  return newpoint;
-}
-*/
-
 Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
 
   double x = point2convert_x - car_map_pos_x;
@@ -140,7 +115,7 @@ int main() {
 
           double latency = 0.1;
           px += v * cos(psi) * latency;
-	  py += v * sin(psi) * latency;
+          py += v * sin(psi) * latency;
           psi -= (v/2.67) * steering_angle * latency;
           v += throttle * latency;
 
@@ -164,20 +139,17 @@ int main() {
 
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
-          double cte = -coeffs_conv[0]; //polyeval(coeffs, px) - py;
+          double cte = coeffs_conv[0];
           // Due to the sign starting at 0, the orientation error is -f'(x).
           // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
     	  double psides = atan(coeffs_conv[1]);
-    	  //for (int j = 1; j < coeffs.size(); j++) {
-    	  //  psides += coeffs[j] * j * pow(px, j - 1);
-    	  //}
-          double epsi = psi - psides;
+    	  double epsi = psi - psides;
           std::cout << "cte: " << cte << " epsi: " << epsi << std::endl;
 
           Eigen::VectorXd state(6);
           state << px, py, psi, v, cte, epsi;
 
-   		  auto results = mpc.Solve(state, coeffs);
+          auto results = mpc.Solve(state, coeffs);
 
           double steer_value = results[0];
           steer_value /= deg2rad(25);
@@ -211,8 +183,8 @@ int main() {
         	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
         	convertedPoint = convert2carcoordinates(px, py, psi, results[2*(1+j)], results[2*(1+j)+1]);
             //if (results[2*(1+j)] > 0.0 && results[2*(1+j)] < 100.0) {  //only show projection about 100 m ahead
-        	  mpc_x_vals.push_back(convertedPoint[0]);
-              mpc_y_vals.push_back(convertedPoint[1]);
+                mpc_x_vals.push_back(convertedPoint[0]);
+                mpc_y_vals.push_back(convertedPoint[1]);
             //}
           }
 
@@ -246,7 +218,8 @@ int main() {
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
+          
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.

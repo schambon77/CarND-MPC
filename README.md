@@ -20,8 +20,6 @@ The code compiles without errors with cmake and make.
 
 #### The Model
 
-Student describes their model in detail. This includes the state, actuators and update equations.
-
 From the data passed by the simulator, we update the following state variables:
 
 * `ptsx`: waypoints x map coordinates
@@ -40,41 +38,87 @@ The waypoints map coordinates are then converted into car coordinates using the 
 In car coordinates, the car is located at the origin (0, 0). The polynomial coefficients are then used in a simple manner to compute:
 
 * the cross-track error `cte` with `coeff_conv[0]`
-* and the heading error epsi with `coeff_conv[1]`
+* and the heading error `epsi` with `coeff_conv[1]`
 
+The state in car coordinates is compiled by adding to the origin coordinates (0, 0) a heading angle 0 and the computed `cte` and `epsi`. The state is passed along the polynomial coefficients to our Model Predictive Control class `Solve` method. 
 
+The skeleton of the MPC class studied in the lessons is heavily reused, including:
 
+* initial state updated from the car state input argument 
+* lower and upper bounds for all variables
+* constraints for non-actuator variables
 
+The solver uses the following cost function:
+
+	// The part of the cost based on the reference state.
+	for (t = 0; t < N; t++) {
+	  fg[0] += 10*(1 + 3*t/N)*CppAD::pow(vars[cte_start + t], 2);
+	  fg[0] += 10*(1 + 3*t/N)*CppAD::pow(vars[epsi_start + t], 2);
+	  fg[0] += 1*CppAD::pow(vars[v_start + t] - ref_v, 2);
+	}
+
+	// Minimize the use of actuators.
+	for (t = 0; t < N - 1; t++) {
+	  fg[0] += 10*CppAD::pow(vars[delta_start + t], 2);
+	  fg[0] += 10*CppAD::pow(vars[a_start + t], 2);
+	}
+
+	// Minimize the value gap between sequential actuations.
+	for (t = 0; t < N - 2; t++) {
+	  fg[0] += 100000*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+	  fg[0] += 10*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+	}
+
+The same cost features are used, with noticeable differences on the weight of each feature. Noticeably 2 points:
+
+* a very high weight on the steering variations (100000), in order to keep smooth driving without abrupt steering changes
+* a gradually increasing weight for `cte` and `epsi` errors for more distant points: the idea is to emphasize focus on the further horizon than the immediate vicinity of the car
+
+The update equations rename vastly untouched, except for the update of `psi` which requires a change of sign to incorporate the simulator convention on steering angle sign.
+
+	  fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
+	  fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+	  fg[1 + psi_start + t] = psi1 - (psi0 - v0 * (delta0 / Lf) * dt);  //model equation modified to factor positive angle means right turn
+	  fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
+	  fg[1 + cte_start + t] = cte1 - ((y0 - f0) + (v0 * CppAD::sin(epsi0) * dt));
+	  fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * (delta0 / Lf) * dt);
+
+Note f0 and psides0 require the polynomial coefficients to be calculated.
+
+The resulting immediate next step actuator values for steering angle and acceleration, as well as all x and y coordinates of predicted future states, are returned to the main function, to be passed back to the simulator.
 
 #### Timestep Length and Elapsed Duration (N & dt)
 
-Student discusses the reasoning behind the chosen N (timestep length) and dt (elapsed duration between timesteps) values. Additionally the student details the previous values tried.
+After many trials, the chosen values are:
+
+* `N`: 25
+* `dt`: 0.05
+
+This is actually strongly correlated to the chosen reference speed `ref_v` set to 50. Once the car takes some speed, the chosen values allow a reasonnable look-ahead prediction (1.25 second, equivalent to 28 meters), without going too far, which would be unecessary.
+
+Other tried values include a combination of much larger `N` and slower reference speeds, but proved unstable due to my cost weights.
 
 #### Polynomial Fitting and MPC Preprocessing
 
-A polynomial is fitted to waypoints.
+The following method is used to convert waypoints from map coordinates to car coordinates:
 
-If the student preprocesses waypoints, the vehicle state, and/or actuators prior to the MPC procedure it is described.
+    Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
 
-Eigen::VectorXd convert2carcoordinates(double car_map_pos_x, double car_map_pos_y, double car_map_psi, double point2convert_x, double point2convert_y) {
+    double x = point2convert_x - car_map_pos_x;
+    double y = point2convert_y - car_map_pos_y;
 
-  double x = point2convert_x - car_map_pos_x;
-  double y = point2convert_y - car_map_pos_y;
+    Eigen::VectorXd newpoint(2);
+    newpoint[0] = x * cos(-car_map_psi) - y * sin(-car_map_psi);
+    newpoint[1] = x * sin(-car_map_psi) + y * cos(-car_map_psi);
 
-  Eigen::VectorXd newpoint(2);
-  newpoint[0] = x * cos(-car_map_psi) - y * sin(-car_map_psi);
-  newpoint[1] = x * sin(-car_map_psi) + y * cos(-car_map_psi);
+    return newpoint;
+  }
 
-  return newpoint;
-}
-
-polynomial order 3 with converted waypoints
-
-
+A polynomial of order 3 (as recommended in the lesson) is then fitted on the converted waypoints.
 
 #### Model Predictive Control with Latency
 
-The student implements Model Predictive Control that handles a 100 millisecond latency. Student provides details on how they deal with latency.
+Latency is handled by the following piece of code, which updates the state variables `px`, `py`, `psi` and `v` with the motion model equations: 
 
           double latency = 0.1;
           px += v * cos(psi) * latency;
@@ -82,7 +126,8 @@ The student implements Model Predictive Control that handles a 100 millisecond l
           psi -= (v/Lf) * steering_angle * latency;
           v += throttle * latency;
 
+Note this is the first transformation performed (before polynomial fitting).
 
 ### Simulation
 
-The vehicle successfully drives a lap safely around the track.
+The vehicle successfully drives a lap safely around the track at an average speed slighty below 50 mph.

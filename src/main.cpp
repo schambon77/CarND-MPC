@@ -114,8 +114,6 @@ int main() {
           v += throttle * latency;
 
           size_t i;
-          Eigen::VectorXd ptsx_e(ptsx.size());
-          Eigen::VectorXd ptsy_e(ptsy.size());
           Eigen::VectorXd ptsx_conv(ptsx.size());
           Eigen::VectorXd ptsy_conv(ptsy.size());
           Eigen::VectorXd convertedPoint;
@@ -124,8 +122,6 @@ int main() {
         	  convertedPoint = convert2carcoordinates(px, py, psi, ptsx[i], ptsy[i]);
         	  ptsx_conv(i) = convertedPoint[0];
         	  ptsy_conv(i) = convertedPoint[1];
-        	  ptsx_e(i) = ptsx[i];
-        	  ptsy_e(i) = ptsy[i];
           }
           auto coeffs_conv = polyfit(ptsx_conv, ptsy_conv, 3);
           
